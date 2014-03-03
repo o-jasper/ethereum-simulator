@@ -1,0 +1,141 @@
+/* global settings */
+
+html, body {
+  height: 100%;
+}
+
+*, *:before, *:after {
+  -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+}
+
+/* app sections */
+
+#left {
+  width: 50%;
+  height: 80%;
+  float: left;
+}
+#right {
+  width: 50%;
+  height: 80%;
+  margin-left: 50%;
+}
+
+.app-screen {
+  border: solid 6px rgb(124, 7, 127);
+  border-right-color: rgb(162, 57, 165);
+  border-bottom-color: rgb(172, 78, 175);
+  background-color: rgba(0, 0, 0, 0.77);
+  padding: 6px;
+  font-family: monospace;
+  color: rgb(39, 143, 0);
+  overflow: scroll;
+}
+.app-screen .clickable:hover {
+  color: rgb(55, 186, 6);
+  transition: color .25s;
+  -moz-transition: color .25s;
+  -webkit-transition: color .25s;
+}
+.app-panel {
+  overflow: hidden;
+  background-color: rgb(141, 40, 152);
+  padding: 6px;
+  font-family: monospace;
+  color: rgb(39, 143, 0);
+}
+.app-screen .textarea {
+  outline: none;
+  border: dotted rgb(39, 143, 0);
+  height: auto;
+  min-height: 100px;
+  padding: 2px;
+}
+
+.app-screen input {
+  outline: none;
+  border: 0;
+  border-radius: 0;
+  background-color: rgb(39, 143, 0);
+  color: rgba(0, 0, 0, 0.77);
+  font-family: monospace;
+  white-space: nowrap;
+}
+
+.app-screen select {
+  outline: none;
+  -webkit-appearance: button;
+  -moz-appearance: button;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -webkit-padding-end: 20px;
+  -moz-padding-end: 20px;
+  -webkit-padding-start: 2px;
+  -moz-padding-start: 2px;
+  background-color: rgb(39, 143, 0);
+  border: 0;
+  border-radius: 0;
+  color: rgba(0, 0, 0, 0.77);
+  font-family: monospace;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#wallets {
+  height: 50%;
+}
+#contracts {
+  height: 50%;
+}
+
+#details {
+  height: 90%;
+  color: rgb(55, 186, 6);
+}
+#details .clickable:hover {
+  color: rgb(71, 222, 14);
+}
+
+#controls {
+  height: 10%;
+}
+
+#transactions {
+  height: 20%;
+}
+
+.ethereum-code {
+  white-space: pre;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.app-panel .svg-button {
+  opacity: 0.2;
+  transition: opacity .25s;
+  -moz-transition: opacity .25s;
+  -webkit-transition: opacity .25s;
+}
+.app-panel .svg-button:hover {
+  opacity: 0.8;
+}
+
+#button-transaction {
+  height: 100%;
+  max-width: 25%;
+}
+#button-contract {
+  height: 100%;
+  max-width: 25%;
+}
+#button-wallet {
+  height: 100%;
+  max-width: 25%;
+}
+#button-info {
+  float: right;
+  height: 100%;
+  max-width: 25%;
+}
