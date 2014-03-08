@@ -367,7 +367,7 @@ module.exports = function(settings) {
     msg += '('+wallet.value+') '
     msg += wallet.id
     el = el || document.querySelector('.wallet[data-id="'+wallet.id+'"]')
-    el.innerText = msg
+    el.textContent = msg
     console.log(msg)
   }
 
@@ -388,7 +388,7 @@ module.exports = function(settings) {
     msg += '('+wallet.value+') '
     msg += contract.id
     el = el || document.querySelector('.contract[data-id="'+contract.id+'"]')
-    el.innerText = msg
+    el.textContent = msg
     console.log(msg)
   }
 
@@ -400,7 +400,7 @@ module.exports = function(settings) {
     var blockElement = document.createElement('div')
     blockElement.setAttribute('data-id',block.id)
     blockElement.className = 'block'
-    blockElement.innerText = msg
+    blockElement.textContent = msg
     appElements.blocks.appendChild(blockElement)
     // add transactions inside
     block.transactions.map(function(transaction){
@@ -427,7 +427,7 @@ module.exports = function(settings) {
     var el = document.createElement('div')
     el.setAttribute('data-id',transaction.id)
     el.className = 'transaction clickable'
-    el.innerText = msg
+    el.textContent = msg
     console.log(msg)
     return el
   }
@@ -439,7 +439,7 @@ module.exports = function(settings) {
     var el = document.createElement('div')
     el.setAttribute('data-id',contract.id)
     el.className = 'contract clickable'
-    el.innerText = msg
+    el.textContent = msg
     console.log(msg)
     return el
   }
@@ -451,7 +451,7 @@ module.exports = function(settings) {
     var el = document.createElement('div')
     el.setAttribute('data-id',contract.id)
     el.className = 'contract clickable'
-    el.innerText = msg
+    el.textContent = msg
     console.log(msg)
     return el
   }
@@ -590,7 +590,7 @@ module.exports = function(settings) {
       sender: document.getElementById('nt-select-from').value,
       value: +document.getElementById('nt-value').value,
       fee: +document.getElementById('nt-fee').value,
-      data: document.getElementById('nt-data').innerText.split('\n'),
+      data: document.getElementById('nt-data').textContent.split('\n'),
     }
   }
 
@@ -599,7 +599,7 @@ module.exports = function(settings) {
       author: document.getElementById('nc-select-author').value,
       value: +document.getElementById('nc-value').value,
       fee: +document.getElementById('nc-fee').value,
-      js: document.getElementById('nc-js').innerText,
+      js: document.getElementById('nc-js').textContent,
     }
   }
 
@@ -954,7 +954,7 @@ exports["default"] = Handlebars;
 var Utils = require("./utils");
 var Exception = require("./exception")["default"];
 
-var VERSION = "v2.0.0-alpha.1";
+var VERSION = "2.0.0-alpha.2";
 exports.VERSION = VERSION;var COMPILER_REVISION = 5;
 exports.COMPILER_REVISION = COMPILER_REVISION;
 var REVISION_CHANGES = {
@@ -1638,15 +1638,15 @@ Compiler.prototype = {
   },
 
   hash: function(hash) {
-    var pairs = hash.pairs, pair;
+    var pairs = hash.pairs, i, l;
 
     this.opcode('pushHash');
 
-    for(var i=0, l=pairs.length; i<l; i++) {
-      pair = pairs[i];
-
-      this.pushParam(pair[1]);
-      this.opcode('assignToHash', pair[0]);
+    for(i=0, l=pairs.length; i<l; i++) {
+      this.pushParam(pairs[i][1]);
+    }
+    while(i--) {
+      this.opcode('assignToHash', pairs[i][0]);
     }
     this.opcode('popHash');
   },
@@ -1822,9 +1822,7 @@ Compiler.prototype = {
   },
 
   pushParams: function(params) {
-    var i = params.length;
-
-    while(i--) {
+    for(var i=0, l=params.length; i<l; i++) {
       this.pushParam(params[i]);
     }
   },
@@ -2008,12 +2006,13 @@ JavaScriptCompiler.prototype = {
 
     this.compileChildren(environment, options);
 
-    var opcodes = environment.opcodes, opcode;
+    var opcodes = environment.opcodes,
+        opcode,
+        i,
+        l;
 
-    this.i = 0;
-
-    for(var l=opcodes.length; this.i<l; this.i++) {
-      opcode = opcodes[this.i];
+    for (i = 0, l = opcodes.length; i < l; i++) {
+      opcode = opcodes[i];
 
       if(opcode.opcode === 'DECLARE') {
         this[opcode.name] = opcode.value;
@@ -2040,11 +2039,12 @@ JavaScriptCompiler.prototype = {
         compiler: this.compilerInfo(),
         main: fn
       };
-      this.context.programs.map(function(program, index) {
-        if (program) {
-          ret[index] = program;
+      var programs = this.context.programs;
+      for (i = 0, l = programs.length; i < l; i++) {
+        if (programs[i]) {
+          ret[i] = programs[i];
         }
-      });
+      }
 
       if (this.environment.usePartial) {
         ret.usePartial = true;
@@ -2531,11 +2531,10 @@ JavaScriptCompiler.prototype = {
 
   // [assignToHash]
   //
-  // On stack, before: value, hash, ...
-  // On stack, after: hash, ...
+  // On stack, before: value, ..., hash, ...
+  // On stack, after: ..., hash, ...
   //
-  // Pops a value and hash off the stack, assigns `hash[key] = value`
-  // and pushes the hash back onto the stack.
+  // Pops a value off the stack and assigns it to the current hash
   assignToHash: function(key) {
     var value = this.popStack(),
         context,
@@ -2839,16 +2838,19 @@ JavaScriptCompiler.prototype = {
       options.inverse = inverse;
     }
 
-    for (var i = 0; i < paramSize; i++) {
+    // The parameters go on to the stack in order (making sure that they are evaluated in order)
+    // so we need to pop them off the stack in reverse order
+    var i = paramSize;
+    while (i--) {
       param = this.popStack();
-      params.push(param);
+      params[i] = param;
 
       if (this.trackIds) {
-        ids.push(this.popStack());
+        ids[i] = this.popStack();
       }
       if (this.stringParams) {
-        types.push(this.popStack());
-        contexts.push(this.popStack());
+        types[i] = this.popStack();
+        contexts[i] = this.popStack();
       }
     }
 
