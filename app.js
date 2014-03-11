@@ -1,3 +1,5 @@
+var __templateFiles='./templates/default/'
+
 var Simulator = require('./index.js').Simulator
 var setupView = require('./lib/view.js')
 var loadData = require('./lib/initialData.js')
